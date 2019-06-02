@@ -4,7 +4,86 @@ warnings.filterwarnings('ignore')
 import numpy as np
 import pickle
 import os
-# from gensim import corpora, models, similarities, matutils
+
+def getCossim(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1)*(np.linalg.norm(vec2)))
+
+
+def getMaxSimilarity(vector, centers, variances):
+    maxValue = 0
+    maxIndex = -1
+    for k,center in centers.iteritems():
+        join = getCossim(vector, center)/(1 + variances[k])
+        oneSimilarity = join
+        for kk, c in centers.iteritems():
+            if kk != k:
+                oneSimilarity = oneSimilarity + getCossim(c, center) * getCossim(vector, c)/(1 + variances[kk])
+
+        if oneSimilarity > maxValue:
+            maxValue = oneSimilarity
+            maxIndex = k
+    return maxIndex, maxValue
+
+
+
+def single_pass(vectors, thres):
+    topics = []
+    dictCluster = {}
+    clusterVars = {}
+    clusterMeans = {}
+    clusterCenter = {}
+
+    numCluster = 0 
+    cnt = 0
+    topic = 0
+    for vector in vectors: 
+        if numCluster == 0:
+            dictCluster[numCluster] = []
+            dictCluster[numCluster].append(vector)
+
+            clusterCenter[numCluster] = vector
+            clusterMeans[numCluster] = 0
+            clusterVars[numCluster] = 0
+
+            numCluster += 1
+    
+        else:
+            maxIndex, maxValue = getMaxSimilarity(vector, clusterCenter, clusterVars)
+            print maxValue
+            
+            #join the most similar topic
+            if maxValue > thres:
+                dictCluster[maxIndex].append(vector)
+
+                # print(np.array(dictCluster[maxIndex][0]))
+                clusterCenter[maxIndex] = np.mean(np.array(dictCluster[maxIndex]), axis=0)
+                # print(clusterCenter[maxIndex])
+
+                newSum = clusterMeans[maxIndex] * len(dictCluster[maxIndex]) + getCossim(vector, clusterCenter[maxIndex])
+                # print(newSum)
+                clusterMeans[maxIndex] = newSum / (len(dictCluster[maxIndex])+1)
+                clusterVars[maxIndex] = np.var([getCossim(clusterCenter[maxIndex], v) for v in dictCluster[maxIndex]])
+
+                # print(0, clusterMeans[0], clusterVars[0])
+
+                topic = maxIndex
+            #else create the new topic
+            else:
+                dictCluster[numCluster] = []
+                dictCluster[numCluster].append(vector)
+
+                clusterCenter[numCluster] = vector
+                clusterMeans[numCluster] = 0
+                clusterVars[numCluster] = 0
+
+                topic = numCluster
+                numCluster += 1
+        topics.append(topic)
+        cnt += 1
+        if cnt % 500 == 0:
+            print "processing {}".format(cnt)
+    return dictCluster, topics
+
 
 rootpath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
 datapath = os.path.join(os.path.sep, rootpath, 'data') 
@@ -19,60 +98,9 @@ y=pickle.load(open(os.path.join(os.path.sep, datapath, 'train_label.pkl'),'rb'))
 x=np.array(x)
 y=np.array(y)
 
-
-def getCossim(vec1, vec2):
-    return np.dot(vec1, vec2) / (np.linalg.norm(vec1)*(np.linalg.norm(vec2)))
-
-
-def getMaxSimilarity(topics, vector):
-    maxValue = 0
-    maxIndex = -1
-    for k,cluster in topics.iteritems():
-        oneSimilarity = np.mean([getCossim(vector, v) for v in cluster])
-        if oneSimilarity > maxValue:
-            maxValue = oneSimilarity
-            maxIndex = k
-    return maxIndex, maxValue
-
-
-
-def single_pass(vectors, thres):
-    topics = []
-    dictCluster = {}
-    numCluster = 0 
-    cnt = 0
-    topic = 0
-    for vector in vectors: 
-        if numCluster == 0:
-            dictCluster[numCluster] = []
-            dictCluster[numCluster].append(vector)
-
-            numCluster += 1
-    
-        else:
-            maxIndex, maxValue = getMaxSimilarity(dictCluster, vector)
-            # print maxValue
-            
-            #join the most similar topic
-            if maxValue > thres:
-                dictCluster[maxIndex].append(vector)
-                topic = maxIndex
-            #else create the new topic
-            else:
-                dictCluster[numCluster] = []
-                dictCluster[numCluster].append(vector)
-                topic = numCluster
-                numCluster += 1
-        topics.append(topic)
-        cnt += 1
-        if cnt % 100 == 0:
-            print "processing {}".format(cnt)
-    return dictCluster, topics
-
 print 'read over'
-print x.shape
 
-thres = 0.01
+thres = 0.06
 dictCluster, topics = single_pass(x, thres)
 
 i = 0
@@ -88,6 +116,9 @@ for topic in topics:
         cluster_to_class[topic] = []
     cluster_to_class[topic].append(y[i])
     i = i + 1
+
+for c in cluster_to_class.keys():
+    print(cluster_to_class[c])
 
 purities = []
 entropies = []
