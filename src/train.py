@@ -6,14 +6,15 @@ import pickle
 import os
 from gensim import corpora, models, similarities, matutils
 
-datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+root=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+datapath = os.path.join(os.path.sep, rootpath, 'data') 
 
 # from sklearn import preprocessing
 # from sklearn import metrics
 # import matplotlib.pyplot as plt
 print 'reading data...'
-x=pickle.load(open(datapath + '/data/tfidf_data.pkl','rb'))
-y=pickle.load(open(datapath + '/data/train_label.pkl','rb'))
+x=pickle.load(open(os.path.sep, datapath, 'tfidf_data.pkl','rb'))
+y=pickle.load(open(os.path.sep, datapath, 'train_label.pkl','rb'))
 
 x=np.array(x)
 y=np.array(y)

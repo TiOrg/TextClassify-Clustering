@@ -7,12 +7,13 @@ import pickle
 # 采用TF-IDF 算法对选取得到的特征进行计算权重
 DocumentCount = 200 # 每个类别选取200篇文档
 
-datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+rootpath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))  
+datapath = os.path.join(os.path.sep, rootpath, 'data') 
 
 ClassCode = ['C000007', 'C000008', 'C000010', 'C000013','C000014', 'C000016', 'C000020', 'C000022', 'C000024']
 # 构建每个类别的词Set
 # 分词后的文件路径
-textCutBasePath = datapath+"/data/SogouCC/" 
+textCutBasePath = os.path.join(os.path.sep, datapath, 'SougouCC') 
 def readFeature(featureName):
     featureFile = open(featureName, 'r')
     featureContent = featureFile.read().split('\n')
@@ -28,10 +29,10 @@ def readFeature(featureName):
 def readFileToList(textCutBasePath, ClassCode, DocumentCount):
     dic = dict()
     for eachclass in ClassCode:
-        currClassPath = textCutBasePath + eachclass + "/"
+        currClassPath = os.path.join(os.path.sep, textCutBasePath, eachclass)
         eachclasslist = list()
         for i in range(DocumentCount):
-            eachfile = open(currClassPath+str(i)+".cut")
+            eachfile = open(os.path.join(os.path.sep, currClassPath, (str(i)+".cut")),'r')
             eachfilecontent = eachfile.read()
             eachfilewords = eachfilecontent.split(" ")
             eachclasslist.append(eachfilewords)
@@ -91,12 +92,12 @@ def TFIDFCal(feature, dic,idffeature):
     return tfidf_data,train_label
 
 dic = readFileToList(textCutBasePath, ClassCode, DocumentCount)
-feature = readFeature(datapath+"/data/SVMFeature.txt")
+feature = readFeature(rootpath+"/data/SVMFeature.txt")
 #print(len(feature))
-idffeature = featureIDF(dic, feature, datapath+"/data/dffeature.txt")
+idffeature = featureIDF(dic, feature, os.path.join(os.path.sep, datapath, 'dffeature.txt')) 
 tfidf_data,train_label=TFIDFCal(feature, dic,idffeature)
-pickle.dump(tfidf_data,open(datapath+'/data/tfidf_data.pkl','wb'))
-pickle.dump(train_label,open(datapath + '/data/train_label.pkl','wb'))
+pickle.dump(tfidf_data,open(os.path.join(os.path.sep, datapath, 'tfidf_data.pkl'),'wb'))
+pickle.dump(train_label,open(os.path.join(os.path.sep, datapath, 'train_label.pkl'),'wb'))
 
 
 # tfidf_data=np.array(tfidf_data)

@@ -16,25 +16,29 @@ DocumentCount = 200 # 每个类别选取200篇文档
 # b：不在该分类下包含这个词的文档数量
 # c：在这个分类下不包含这个词的文档数量
 # d：不在该分类下，且不包含这个词的文档数量
-datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+rootpath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+readpath = os.path.join(os.path.sep, rootpath, 'SogouC') 
+ccpath = os.path.join(os.path.sep, rootpath, 'data', 'SougouCC') 
+stoppath = os.path.join(os.path.sep, readpath, 'stopwords.txt') 
 
 ClassCode = ['C000007', 'C000008', 'C000010', 'C000013','C000014', 'C000016', 'C000020', 'C000022', 'C000024']
-stopwords = {}.fromkeys([line.rstrip() for line in open(datapath+'/SogouC/stopwords.txt')])  
+stopwords = {}.fromkeys([line.rstrip() for line in open(stoppath)])  
 
 
 # 分词后的文件路径
-textCutBasePath = datapath + "/data/SogouCC/"
+textCutBasePath = ccpath
 # 构建每个类别的词向量
 def buildItemSets(classDocCount):
     termDic = dict()
     # 每个类别下的文档集合用list<set>表示, 每个set表示一个文档，整体用一个dict表示
     termClassDic = dict()
     for eachclass in ClassCode:
-        currClassPath = textCutBasePath+eachclass+"/"
+        currClassPath = os.path.join(os.path.sep, textCutBasePath, eachclass)
+
         eachClassWordSets = set()
         eachClassWordList = list()
         for i in range(classDocCount):
-            eachDocPath = currClassPath+str(i)+".cut"
+            eachDocPath = os.path.join(os.path.sep, currClassPath, (str(i)+".cut"))
             eachFileObj = open(eachDocPath, 'r')
             eachFileContent = eachFileObj.read()
             eachFileWords = eachFileContent.split(" ")
@@ -141,4 +145,4 @@ def writeFeatureToFile(termCountDic , fileName):
 # buildItemSets形参表示每个类别的文档数目,在这里训练模型时每个类别取前200个文件
 termDic, termClassDic = buildItemSets(DocumentCount)
 termCountDic = featureSelection(termDic, termClassDic, 1000)
-writeFeatureToFile(termCountDic, datapath + "/data/SVMFeature.txt")
+writeFeatureToFile(termCountDic, os.path.join(os.path.sep, rootpath, 'data', 'SVMFeature.txt')) 
