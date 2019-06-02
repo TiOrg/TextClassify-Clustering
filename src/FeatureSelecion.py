@@ -5,6 +5,7 @@ from math import log
 import sys
 import numpy as np
 import re
+import os
 # 使用开方检验选择特征
 # 按UTF-8编码格式读取文件
 
@@ -15,13 +16,14 @@ DocumentCount = 200 # 每个类别选取200篇文档
 # b：不在该分类下包含这个词的文档数量
 # c：在这个分类下不包含这个词的文档数量
 # d：不在该分类下，且不包含这个词的文档数量
+datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
 
 ClassCode = ['C000007', 'C000008', 'C000010', 'C000013','C000014', 'C000016', 'C000020', 'C000022', 'C000024']
-stopwords = {}.fromkeys([line.rstrip() for line in open(sys.path[0]+'/stopwords.txt')])  
+stopwords = {}.fromkeys([line.rstrip() for line in open(datapath+'/SogouC/stopwords.txt')])  
 
 
 # 分词后的文件路径
-textCutBasePath = sys.path[0] + "/SogouCC/"
+textCutBasePath = datapath + "/data/SogouCC/"
 # 构建每个类别的词向量
 def buildItemSets(classDocCount):
     termDic = dict()
@@ -139,4 +141,4 @@ def writeFeatureToFile(termCountDic , fileName):
 # buildItemSets形参表示每个类别的文档数目,在这里训练模型时每个类别取前200个文件
 termDic, termClassDic = buildItemSets(DocumentCount)
 termCountDic = featureSelection(termDic, termClassDic, 1000)
-writeFeatureToFile(termCountDic, "SVMFeature.txt")
+writeFeatureToFile(termCountDic, datapath + "/data/SVMFeature.txt")

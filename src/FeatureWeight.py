@@ -1,15 +1,18 @@
 #coding:utf-8 
 import math
 import sys
+import os
 import numpy as np
 import pickle
 # 采用TF-IDF 算法对选取得到的特征进行计算权重
 DocumentCount = 200 # 每个类别选取200篇文档
 
+datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+
 ClassCode = ['C000007', 'C000008', 'C000010', 'C000013','C000014', 'C000016', 'C000020', 'C000022', 'C000024']
 # 构建每个类别的词Set
 # 分词后的文件路径
-textCutBasePath = sys.path[0] + "/SogouCC/"
+textCutBasePath = datapath+"/data/SogouCC/" 
 def readFeature(featureName):
     featureFile = open(featureName, 'r')
     featureContent = featureFile.read().split('\n')
@@ -88,16 +91,16 @@ def TFIDFCal(feature, dic,idffeature):
     return tfidf_data,train_label
 
 dic = readFileToList(textCutBasePath, ClassCode, DocumentCount)
-feature = readFeature("SVMFeature.txt")
+feature = readFeature(datapath+"/data/SVMFeature.txt")
 #print(len(feature))
-idffeature = featureIDF(dic, feature, "dffeature.txt")
+idffeature = featureIDF(dic, feature, datapath+"/data/dffeature.txt")
 tfidf_data,train_label=TFIDFCal(feature, dic,idffeature)
-pickle.dump(tfidf_data,open('tfidf_data.pkl','wb'))
-pickle.dump(train_label,open('train_label.pkl','wb'))
+pickle.dump(tfidf_data,open(datapath+'/data/tfidf_data.pkl','wb'))
+pickle.dump(train_label,open(datapath + '/data/train_label.pkl','wb'))
 
 
-tfidf_data=np.array(tfidf_data)
-np.savetxt('tfidf_data.txt',tfidf_data)
+# tfidf_data=np.array(tfidf_data)
+# np.savetxt('tfidf_data.txt',tfidf_data)
 # file=open('tfidf_data.dat','wb')
 # file.write(str(tfidf_data))
 # file.close()

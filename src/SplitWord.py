@@ -5,7 +5,6 @@ import re
 import string  
 
 
-readpath=curpath+"/SogouC" 
 datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
 readpath=datapath+"/SogouC" 
 writepath=datapath+"/data/SogouCC" 
