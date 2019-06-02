@@ -19,76 +19,15 @@ y=pickle.load(open(os.path.join(os.path.sep, datapath, 'train_label.pkl'),'rb'))
 x=np.array(x)
 y=np.array(y)
 
-# from sklearn.model_selection import train_test_split  
-# x_train, x_test, y_train, y_test = train_test_split(x, y , test_size=0.15, random_state=33)  
-
-# def try_diff(clf):
-# 	clf.fit(x_train,y_train)
-# 	score = clf.score(x_test, y_test)
-# 	print('score: %f'%score)
-# 	predicted = clf.predict(x_test)  
-# 	print(metrics.classification_report(y_test,predicted))
-# 	# plt.figure()
-# 	# plt.plot(np.arange(len(predicted)),y_test,'go-',label='true value')
-# 	# plt.plot(np.arange(len(predicted)),predicted,'ro-',label='predict value')
-# 	# plt.title('score: %f'%score)
-# 	# plt.legend()
-# 	# plt.show()
-
-
-# from sklearn import tree
-# DTR = tree.DecisionTreeRegressor()
-
-# from sklearn.svm import LinearSVC  
-# SVM= LinearSVC()  
-
-# from sklearn.linear_model import LogisticRegression
-# LR=LogisticRegression()
-
-# from sklearn import neighbors
-# KNN=neighbors.KNeighborsClassifier()
-
-# from sklearn.naive_bayes import MultinomialNB
-# NB=MultinomialNB()
-
-# from sklearn.neural_network import MLPClassifier
-# MLP=MLPClassifier()
-
-# from sklearn import ensemble
-# RFC = ensemble.RandomForestClassifier(n_estimators=100)  
-# ADA = ensemble.AdaBoostClassifier(n_estimators=100)
-# GBRT = ensemble.GradientBoostingClassifier(n_estimators=100)
-
-
-
-# print('\n\nADA:')
-# try_diff(ADA)
-# print('\n\nRFC:')
-# try_diff(RFC)
-# print('\n\nGBRT:')
-# try_diff(GBRT)
-
-# print('\n\nDTR:')
-# try_diff(DTR)
-# print('\n\nMLP:')
-# try_diff(MLP)
-# print('\n\nSVM:')
-# try_diff(SVM)
-# print('\n\nLR:')
-# try_diff(LR)
-# print('\n\nKNN:')
-# try_diff(KNN)
-# print('\n\nNB:')
-# try_diff(NB)
 
 def getCossim(vec1, vec2):
     return np.dot(vec1, vec2) / (np.linalg.norm(vec1)*(np.linalg.norm(vec2)))
 
 
-def getMaxSimilarity(dictTopic, vector):
+def getMaxSimilarity(topics, vector):
     maxValue = 0
     maxIndex = -1
-    for k,cluster in dictTopic.iteritems():
+    for k,cluster in topics.iteritems():
         oneSimilarity = np.mean([getCossim(vector, v) for v in cluster])
         if oneSimilarity > maxValue:
             maxValue = oneSimilarity
@@ -98,7 +37,7 @@ def getMaxSimilarity(dictTopic, vector):
 
 
 def single_pass(vectors, thres):
-    dictTopic = []
+    topics = []
     dictCluster = {}
     numCluster = 0 
     cnt = 0
@@ -124,29 +63,47 @@ def single_pass(vectors, thres):
                 dictCluster[numCluster].append(vector)
                 topic = numCluster
                 numCluster += 1
-        dictTopic.append(topic)
+        topics.append(topic)
         cnt += 1
         if cnt % 100 == 0:
             print "processing {}".format(cnt)
-    return dictCluster, dictTopic
+    return dictCluster, topics
 
 print 'read over'
 print x.shape
 
 thres = 0.01
-dictCluster, dictTopic = single_pass(x, thres)
+dictCluster, topics = single_pass(x, thres)
 
 i = 0
 sum = 0
 groupNum = 200
 
-for i in range(0,len(dictTopic),groupNum):
-    sub_yy = dictTopic[i:i+groupNum]
-    max_topic = max(set(sub_yy), key=sub_yy.count)
-    max_cnt = sub_yy.count(max_topic)
 
-    print(max_topic)
-    print(max_cnt/len(sub_yy))
-    # print(sub_yy)
-    # sub_yy = y[i: i + groupNum]
-    
+cluster_to_class = {}
+cluster_to_class[0] = []
+i = 0
+for topic in topics:
+    if not cluster_to_class.has_key(topic):
+        cluster_to_class[topic] = []
+    cluster_to_class[topic].append(y[i])
+    i = i + 1
+
+purities = []
+entropies = []
+
+for i in cluster_to_class.keys():
+    sub_yy = cluster_to_class[i]
+
+    max_class = max(set(sub_yy), key=sub_yy.count)
+    max_cnt = sub_yy.count(max_class)
+    purities.append(max_cnt*1.0/len(topics))
+
+    pij = [sub_yy.count(elem) * 1.0/len(sub_yy) for elem in set(sub_yy)]
+    Ei = -np.sum([(p * np.log(p)) for p in pij])
+    entropies.append(len(sub_yy) * 1.0/len(topics) * Ei)
+
+purity = np.sum(purities)
+entropy = np.sum(entropies)
+print(purity)
+print(entropy)
