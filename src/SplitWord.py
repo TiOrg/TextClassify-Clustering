@@ -5,11 +5,13 @@ import re
 import string  
 
 
-datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
-readpath=datapath+"/SogouC" 
-writepath=datapath+"/data/SogouCC" 
-os.chdir(readpath)  
-stopwords = {}.fromkeys([line.rstrip() for line in open(datapath+'/SogouC/stopwords.txt')])  
+rootpath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))  
+
+readpath = os.path.join(os.path.sep, rootpath, 'SogouC') 
+writepath = os.path.join(os.path.sep, rootpath, 'data', 'SougouCC') 
+stoppath = os.path.join(os.path.sep, readpath, 'stopwords.txt') 
+
+stopwords = {}.fromkeys([line.rstrip() for line in open(stoppath)])  
 class_code = ['C000007', 'C000008', 'C000010', 'C000013', 'C000014', 'C000016', 'C000020', 'C000022', 'C000024']
 
 
