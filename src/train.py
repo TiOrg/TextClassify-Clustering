@@ -6,15 +6,15 @@ import pickle
 import os
 from gensim import corpora, models, similarities, matutils
 
-root=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
+rootpath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
 datapath = os.path.join(os.path.sep, rootpath, 'data') 
 
 # from sklearn import preprocessing
 # from sklearn import metrics
 # import matplotlib.pyplot as plt
 print 'reading data...'
-x=pickle.load(open(os.path.sep, datapath, 'tfidf_data.pkl','rb'))
-y=pickle.load(open(os.path.sep, datapath, 'train_label.pkl','rb'))
+x=pickle.load(open(os.path.join(os.path.sep, datapath, 'tfidf_data.pkl'),'rb'))
+y=pickle.load(open(os.path.join(os.path.sep, datapath, 'train_label.pkl'),'rb'))
 
 x=np.array(x)
 y=np.array(y)
@@ -137,8 +137,13 @@ thres = 0.01
 dictCluster, dictTopic = single_pass(x, thres)
 
 i = 0
-for topic in dictTopic:
-    i = i + 1
-    print topic,
-    if i % 200 == 0:
-        print '\n'
+sum = 0
+groupNum = 200
+
+for i in range(0,len(dictTopic),groupNum):
+    sub_yy = dictTopic[i:i+groupNum]
+    max_topic = max(set(sub_yy), key=sub_yy.count)
+    print(max_topic)
+    print(sub_yy)
+    # sub_yy = y[i: i + groupNum]
+    
