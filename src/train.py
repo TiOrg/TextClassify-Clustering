@@ -98,8 +98,8 @@ def getMaxSimilarity(dictTopic, vector):
 
 
 def single_pass(vectors, thres):
-    dictTopic = {}
-    dictCluster = []
+    dictTopic = []
+    dictCluster = {}
     numCluster = 0 
     cnt = 0
     topic = 0
