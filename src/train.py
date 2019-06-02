@@ -3,6 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import numpy as np
 import pickle
+import os
 from gensim import corpora, models, similarities, matutils
 
 datapath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
@@ -97,7 +98,7 @@ def getMaxSimilarity(dictTopic, vector):
 
 def single_pass(vectors, thres):
     dictTopic = {}
-    dictCluster = {}
+    dictCluster = []
     numCluster = 0 
     cnt = 0
     topic = 0
@@ -122,7 +123,7 @@ def single_pass(vectors, thres):
                 dictCluster[numCluster].append(vector)
                 topic = numCluster
                 numCluster += 1
-        dictTopic[cnt] = topic
+        dictTopic.append(topic)
         cnt += 1
         if cnt % 100 == 0:
             print "processing {}".format(cnt)
@@ -135,7 +136,7 @@ thres = 0.01
 dictCluster, dictTopic = single_pass(x, thres)
 
 i = 0
-for topic in dictTopic.values():
+for topic in dictTopic:
     i = i + 1
     print topic,
     if i % 200 == 0:
