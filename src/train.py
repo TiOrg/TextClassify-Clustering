@@ -4,7 +4,7 @@ warnings.filterwarnings('ignore')
 import numpy as np
 import pickle
 import os
-from gensim import corpora, models, similarities, matutils
+# from gensim import corpora, models, similarities, matutils
 
 rootpath=os.path.abspath(os.path.dirname(os.path.dirname(__file__)))           
 datapath = os.path.join(os.path.sep, rootpath, 'data') 
@@ -143,7 +143,10 @@ groupNum = 200
 for i in range(0,len(dictTopic),groupNum):
     sub_yy = dictTopic[i:i+groupNum]
     max_topic = max(set(sub_yy), key=sub_yy.count)
+    max_cnt = sub_yy.count(max_topic)
+
     print(max_topic)
-    print(sub_yy)
+    print(max_cnt/len(sub_yy))
+    # print(sub_yy)
     # sub_yy = y[i: i + groupNum]
     
